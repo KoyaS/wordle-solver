@@ -1,4 +1,4 @@
 from solver import Solver
 
-s = Solver('crane')
+s = Solver('bongo')
 s.run()

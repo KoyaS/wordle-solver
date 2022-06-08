@@ -20,65 +20,62 @@ def guess_word(word):
 	return response
 
 
-class WordleScraper()
+class WordleScraper():
 
 	def __init__(self, headless=False):
+
+		self.board = [
+			[None, None, None, None, None],
+			[None, None, None, None, None],
+			[None, None, None, None, None],
+			[None, None, None, None, None],
+			[None, None, None, None, None],
+			[None, None, None, None, None]
+		]
+
 		chrome_options = Options()
 		if headless:
 			chrome_options.add_argument("--headless")
 		chrome_options.add_experimental_option("useAutomationExtension", False)
 		chrome_options.add_experimental_option("excludeSwitches",["enable-automation"])
 		driver_location = '/Users/koya/Documents/Development/Python/wordle-solver/chromedriver'
-		driver = webdriver.Chrome(driver_location, options=chrome_options)
+		self.driver = webdriver.Chrome(driver_location, options=chrome_options)
+		self.driver.get("https://www.nytimes.com/games/wordle/index.html")
 
-		start_url = "https://www.nytimes.com/games/wordle/index.html"
-		driver.get(start_url)
-
-		# time.sleep(0.5)
-
-		# time.sleep(1.5)
-		# myElem = WebDriverWait(driver, 3).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'svg')))
-		# print(myElem)
-		actions = ActionChains(driver)
+		actions = ActionChains(self.driver)
 		actions.move_by_offset(100, 100).click().perform()
-		# time.sleep(500)
-		# time.sleep(0.5)
 
+	def update_board_state(self):
+		for i in range(6):
+			for j in range(5):
+				letter = self.driver.execute_script("return document.querySelector('html>body>game-app').shadowRoot.querySelector('game-theme-manager>div>div>div>:nth-child({row})').shadowRoot.querySelector('div>:nth-child({letter})')".format(row=i+1, letter=j+1)).get_attribute('letter')
+				state = self.driver.execute_script("return document.querySelector('html>body>game-app').shadowRoot.querySelector('game-theme-manager>div>div>div>:nth-child({row})').shadowRoot.querySelector('div>:nth-child({letter})').shadowRoot.querySelector('div')".format(row=i+1, letter=j+1)).get_attribute('data-state')
+				self.board[i][j] = (letter, state)
 
-def scrape_wordle():
+	def guess_word(self, word, guess_number):
 
-	# click "x" button on popup
-	# driver.find_element_by_css_selector('svg').click()
-	# driver.find_element_by_xpath('//*[@id="game"]/game-modal//div/div/div/game-icon//svg').click()
-	# driver.find_element_by_xpath('/html/body/game-app//game-theme-manager/div/game-modal//div/div/div/game-icon//svg').click()
-	# driver.find_element_by_class_name('game-app>game-theme-manager>game-modal>div>div>.close-icon').click()
-	# driver.find_element_by_css_selector('.close-icon').click()
+		ActionChains(self.driver).send_keys(word).key_down(Keys.ENTER).perform()
+		time.sleep(1.5)
 
-	# time.sleep(1.5)
+		# click to reset cursor
+		actions = ActionChains(self.driver)
+		actions.move_by_offset(100, 100).click().perform()
 
-	# print(driver.page_source)
+		self.update_board_state()
+		response = []
+		for i in range(5):
+			response.append({
+					'slot': i,
+					'guess': self.board[guess_number-1][i][0],
+					'result': self.board[guess_number-1][i][1]
+				})
 
-	# print(driver.find_element(By.CLASS_NAME, 'tile'))
-	# print(driver.find_element_by_class_name('tile'))
-	# print(driver.find_element_by_css_selector('div>game-tile:nth-child(1)'))
-	# print(driver.find_element_by_css_selector('html'))
-	# print(driver.find_element(By.CSS_SELECTOR, 'html>body>game-app').shadowRoot)
+		return response
 
-	# ActionChains(driver).send_keys("depth").key_down(Keys.ENTER).perform()
-	# time.sleep(5)
-
-
-	element = driver.execute_script("return document.querySelector('html>body>game-app').shadowRoot.querySelector('game-theme-manager>div>div>div')")
-	# print(element.find_element(By.CLASS_NAME, 'tile'))
-	# print(element.get_attribute('innerHTML'))
-	for i in range(6):
-		print(element.find_element(By.CSS_SELECTOR, ':nth-child({})'.format(i+1)))
-
-	# delay=3
-	# myElem = WebDriverWait(driver, delay).until(EC.presence_of_element_located((By.CLASS_NAME, 'tile')))
-	# print(myElem)
-
-scrape_wordle()
+# s = WordleScraper()
+# print(s.guess_word('crane', 1))
+# s.guess_word('olive')
+# s.get_board()
 
 
 

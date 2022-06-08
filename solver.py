@@ -4,6 +4,7 @@
 from apigrabber import guess_word
 import re
 import pandas as pd
+from apigrabber import WordleScraper
 
 class Solver():
 
@@ -21,10 +22,14 @@ class Solver():
 		self.state = ['.', '.', '.', '.', '.']
 		self.present = set()
 		self.absent = set()
+		self.guessed_words = set()
+
+		self.guess_api = WordleScraper()
 
 	def evaluate_guess(self, response):
 		correct = 0
-		for letter_data in response.json():
+		for letter_data in response:
+			print(letter_data)
 			if letter_data['result'] == 'present':
 				self.present.add(letter_data['guess'])
 			if letter_data['result'] == 'absent':
@@ -52,6 +57,8 @@ class Solver():
 			filtered_guesses = list(filter(lambda x: letter in x, filtered_guesses))
 		for letter in self.absent:
 			filtered_guesses = list(filter(lambda x: letter not in x, filtered_guesses))
+		for word in self.guessed_words:
+			filtered_guesses = list(filter(lambda x: word not in x, filtered_guesses))
 		
 		guess_scores = []
 		for guess in filtered_guesses:
@@ -62,11 +69,17 @@ class Solver():
 
 
 	def run(self):
-		response = guess_word(self.initial_guess)
+		print('='*40)
+		print('Guessing...', self.initial_guess)
+		print('Present Letters:', self.present)
+		print('Absent Letters:', self.absent)
+		print('State:', self.state)
+		# response = guess_word(self.initial_guess)
+		guess_count = 1
+		response = self.guess_api.guess_word(self.initial_guess, guess_count)
 		correct = self.evaluate_guess(response)
 		new_guesses = self.list_new_guesses()
 
-		guess_count = 0
 		while not correct:
 			guess_count += 1
 			print('='*40)
@@ -75,8 +88,11 @@ class Solver():
 			print('Absent Letters:', self.absent)
 			print('State:', self.state)
 			current_guess = new_guesses[0][0]
-			response = guess_word(current_guess) 					# Guesses from api
+			# response = guess_word(current_guess) 					# Guesses from api
+			response = self.guess_api.guess_word(current_guess, guess_count)
+			print('evaluating guess...')
 			correct = self.evaluate_guess(response)						# updates internal states
+			print('generating list of new guesses...')
 			new_guesses = self.list_new_guesses()						# generates a list of possible next words
 
 		print('='*40)
