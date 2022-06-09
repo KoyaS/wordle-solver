@@ -54,8 +54,10 @@ class WordleScraper():
 
 	def guess_word(self, word, guess_number):
 
-		ActionChains(self.driver).send_keys(word).key_down(Keys.ENTER).perform()
-		time.sleep(1.5)
+		for i in range(5):
+			ActionChains(self.driver).key_down(Keys.BACKSPACE).key_up(Keys.BACKSPACE).perform()
+		ActionChains(self.driver).send_keys(word).key_down(Keys.ENTER).key_up(Keys.ENTER).perform()
+		time.sleep(2)
 
 		# click to reset cursor
 		actions = ActionChains(self.driver)

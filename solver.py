@@ -8,7 +8,7 @@ from apigrabber import WordleScraper
 
 class Solver():
 
-	def __init__(self, initial_guess):
+	def __init__(self, initial_guess, headless=False):
 
 		allowed_words = open("allowed_words.txt", "r")
 		word_list = allowed_words.readlines()
@@ -24,12 +24,11 @@ class Solver():
 		self.absent = set()
 		self.guessed_words = set()
 
-		self.guess_api = WordleScraper()
+		self.guess_api = WordleScraper(headless)
 
 	def evaluate_guess(self, response):
 		correct = 0
 		for letter_data in response:
-			print(letter_data)
 			if letter_data['result'] == 'present':
 				self.present.add(letter_data['guess'])
 			if letter_data['result'] == 'absent':
@@ -97,6 +96,7 @@ class Solver():
 
 		print('='*40)
 		print('Word Guessed in {} attempts:'.format(guess_count), new_guesses[0][0])
+		return new_guesses[0][0]
 
 
 
