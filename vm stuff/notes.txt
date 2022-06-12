@@ -1,0 +1,9 @@
+
+For sshing
+https://www.twilio.com/blog/deploy-flask-python-app-aws
+
+For vm streaming
+https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/connecting_to_windows_instance.html#connect-rdp
+
+Instance hub
+https://ca-central-1.console.aws.amazon.com/ec2/v2/home?refid=fe65e612-357d-4293-b3d2-1dc0c49af512&region=ca-central-1#Instances:
