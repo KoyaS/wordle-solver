@@ -1,3 +1,4 @@
+from curses import raw
 import requests
 from selenium.webdriver.common.by import By
 from selenium import webdriver 
@@ -48,8 +49,52 @@ class WordleScraper():
 	def update_board_state(self):
 		for i in range(6):
 			for j in range(5):
-				letter = self.driver.execute_script("return document.querySelector('html>body>game-app').shadowRoot.querySelector('game-theme-manager>div>div>div>:nth-child({row})').shadowRoot.querySelector('div>:nth-child({letter})')".format(row=i+1, letter=j+1)).get_attribute('letter')
-				state = self.driver.execute_script("return document.querySelector('html>body>game-app').shadowRoot.querySelector('game-theme-manager>div>div>div>:nth-child({row})').shadowRoot.querySelector('div>:nth-child({letter})').shadowRoot.querySelector('div')".format(row=i+1, letter=j+1)).get_attribute('data-state')
+				# print('='*40)
+				
+				# letter = self.driver.execute_script("return document.querySelector('html>body>game-app').shadowRoot.querySelector('game-theme-manager>div>div>div>:nth-child({row})').shadowRoot.querySelector('div>:nth-child({letter})')".format(row=i+1, letter=j+1)).get_attribute('letter')
+				# letter = self.driver.execute_script("return document.querySelector('html>body>#wordle-app-game>div>div>:nth-child({row})').querySelector('div>:nth-child({letter})>div')".format(row=i+1, letter=j+1))
+				letter = self.driver.execute_script("return document.querySelector('html>body>#wordle-app-game>div>div>:nth-child({row})').querySelector('div>div>:nth-child({l})>div')".format(row=i+1, l=j+1))
+				# print(self.driver.execute_script("return document.querySelector('html>body>#wordle-app-game>div>div>:nth-child({row})')".format(row=i+1)).get_attribute('innerHTML'))
+				# print(letter.get_attribute('innerHTML'))
+				# print(letter.get_attribute('data-state'))
+
+				if i == j:
+					row_html = self.driver.execute_script("return document.querySelector('html>body>#wordle-app-game>div>div>:nth-child({row})')".format(row=i+1)).get_attribute('innerHTML')
+
+					letter_html = row_html
+					for z in range(j):
+						letter_html = letter_html[letter_html.index('</div></div>')+12:]
+					
+					letter = letter_html[letter_html.index('</div></div>')-1]
+					
+					state_start_pos = letter_html.index('data-state="')
+					half_cut = letter_html[state_start_pos + 12:]
+					state = half_cut[:half_cut.index('"')]
+
+					if state == 'empty':
+						letter = ''
+				else:
+					state = letter.get_attribute('data-state')
+					letter = letter.get_attribute('innerHTML')
+
+					
+
+
+				# print(letter.get_attribute('innerHTML'))
+				# print(letter.get_attribute('data-state'))
+				# print(letter)
+				# print(state)
+				# print('='*40)
+
+				# Row-module_row__dEHfN <- row classname
+				# class="App-module_game__NSc-J" <- this is the root of the game board, for future reference
+				
+				# state = self.driver.execute_script("return document.querySelector('html>body>game-app').shadowRoot.querySelector('game-theme-manager>div>div>div>:nth-child({row})').shadowRoot.querySelector('div>:nth-child({letter})').shadowRoot.querySelector('div')".format(row=i+1, letter=j+1)).get_attribute('data-state')
+				# state = self.driver.execute_script("return document.querySelector('html>body>game-app').querySelector('game-theme-manager>div>div>div>:nth-child({row})').querySelector('div>:nth-child({letter})').querySelector('div')".format(row=i+1, letter=j+1)).get_attribute('data-state')
+				# state = self.driver.execute_script("return document.querySelector('html>body>game-app')")
+				# print(state.get_attribute('innerHTML'))
+				# state = letter.get_attribute('data-state')
+				# letter = letter.get_attribute('innerHTML')
 				self.board[i][j] = (letter, state)
 
 	def guess_word(self, word, guess_number):

@@ -8,7 +8,7 @@ from apigrabber import WordleScraper
 
 class Solver():
 
-	def __init__(self, initial_guess, headless=False):
+	def __init__(self, initial_guess, headless=False, state=['.', '.', '.', '.', '.'], present=set(), absent=set(), guessed=set()):
 
 		allowed_words = open("allowed_words.txt", "r")
 		word_list = allowed_words.readlines()
@@ -19,16 +19,17 @@ class Solver():
 
 		self.initial_guess = initial_guess
 
-		self.state = ['.', '.', '.', '.', '.']
-		self.present = set()
-		self.absent = set()
-		self.guessed_words = set()
+		self.state = state
+		self.present = present
+		self.absent = absent
+		self.guessed_words = guessed
 
 		self.guess_api = WordleScraper(headless)
 
 	def evaluate_guess(self, response):
 		correct = 0
 		for letter_data in response:
+			# print(letter_data)
 			if letter_data['result'] == 'present':
 				self.present.add(letter_data['guess'])
 			if letter_data['result'] == 'absent':
@@ -83,9 +84,6 @@ class Solver():
 			guess_count += 1
 			print('='*40)
 			print('Guessing...', new_guesses[0])
-			print('Present Letters:', self.present)
-			print('Absent Letters:', self.absent)
-			print('State:', self.state)
 			current_guess = new_guesses[0][0]
 			# response = guess_word(current_guess) 					# Guesses from api
 			response = self.guess_api.guess_word(current_guess, guess_count)
@@ -93,10 +91,17 @@ class Solver():
 			correct = self.evaluate_guess(response)						# updates internal states
 			print('generating list of new guesses...')
 			new_guesses = self.list_new_guesses()						# generates a list of possible next words
+			print('Present Letters:', self.present)
+			print('Absent Letters:', self.absent)
+			print('State:', self.state)
+			if guess_count == 6:
+				return new_guesses, self.state, self.present, self.absent, self.guessed_words
+
 
 		print('='*40)
 		print('Word Guessed in {} attempts:'.format(guess_count), new_guesses[0][0])
-		return new_guesses[0][0]
+		# return new_guesses[0][0]
+		return False,new_guesses[0][0],False,False,False
 
 
 
