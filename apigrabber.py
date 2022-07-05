@@ -1,4 +1,3 @@
-from curses import raw
 import requests
 from selenium.webdriver.common.by import By
 from selenium import webdriver 
